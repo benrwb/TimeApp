@@ -1,0 +1,10 @@
+﻿<Window x:Class="TimeApp2.MainWindow"
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TIMEAPP" Height="137.021" Width="206.81" Topmost="True" ShowActivated="False" Closing="Window_Closing">
+    <Grid>
+        <Label x:Name="label1" Content="Label" HorizontalAlignment="Left" Margin="40,0,0,0" VerticalAlignment="Top" FontSize="60"/>
+
+    </Grid>
+</Window>
+
