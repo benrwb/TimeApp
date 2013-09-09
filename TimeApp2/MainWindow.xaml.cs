@@ -47,20 +47,21 @@ namespace TimeApp2
         void t_Elapsed(object sender, ElapsedEventArgs e)
         {
             DateTime now = DateTime.Now;
-            if (now.Hour < 5) now = now.AddDays(-1);
-            // e.g. late Saturday night is technically early Sunday morning, 
-            //      but we want to class it as Saturday instead.
 
             int level = 0;
-            if (new[] { DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday }.Contains(DateTime.Now.DayOfWeek))
+            if (new[] { DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday }.Contains(now.DayOfWeek))
             {
-                if (DateTime.Now.Hour == 21 && DateTime.Now.Minute % 5 == 0)
-                {
-                    level = 1;
+                if (now.TimeOfDay >= new TimeSpan(22, 45, 0)) 
+                { 
+                    // fail
                 }
-                else if (new[] { 22, 23, 0 }.Contains(DateTime.Now.Hour))
+                else if (now.TimeOfDay >= new TimeSpan(21, 45, 0))
                 {
                     level = 2;
+                }
+                else if (now.TimeOfDay >= new TimeSpan(20, 30, 0))// && DateTime.Now.Minute % 5 == 0)
+                {
+                    level = 1;
                 }
             }
             if (level == 0) return; // nothing to do
@@ -92,11 +93,13 @@ namespace TimeApp2
 
             Dispatcher.Invoke((Action)delegate
             {
-                label1.Content = DateTime.Now.ToString("h:mm");
+                label1.Content = level == 2 && now.Minute % 2 == 0
+                    ? "☠:☠"
+                    : now.ToString("h:mm");
                 this.Show();
             });
 
-            Brush color = (level == 2 ? Brushes.Red : Brushes.LimeGreen);
+            Brush color = (level == 2 ? Brushes.Red : Brushes.Orange);
             Brush altcolor = (level == 2 ? Brushes.Black : Brushes.White);
             for (int i = 0; i < 5; i++)
             {
