@@ -121,9 +121,26 @@ namespace TimeApp2
 
 
 
+        [DllImport("user32.dll")]
+        static extern int GetSystemMetrics(int smIndex);
+        const int SM_CXSCREEN = 0;  // 0x00
+        const int SM_CYSCREEN = 1;  // 0x01
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left;        // x position of upper-left corner
+            public int Top;         // y position of upper-left corner
+            public int Right;       // x position of lower-right corner
+            public int Bottom;      // y position of lower-right corner
+            public int Width { get { return Right - Left; } } // some versions have Right - Left + 1
+            public int Height { get { return Bottom - Top; } } // some versions have Bottom - Top + 1
+        }
         void pos()
         {
-
             IntPtr hwnd = IntPtr.Zero;
             while (hwnd == IntPtr.Zero)
             {
@@ -143,17 +160,34 @@ namespace TimeApp2
             // 62.5 = 16
             // 31.25 = 32
             // 15.625 = 64
+            
+            int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+            int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+            RECT wndsize;
+            GetWindowRect(hwnd, out wndsize);
+
 
             for (int i = 0; i < 1200; i += ms) // follow the mouse cursor for 1.2 seconds, then exit
             {
                 var pos = GetMousePosition();
 
-                SetWindowPos(hwnd, IntPtr.Zero, (int)pos.X + 10, (int)pos.Y + 10, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+                int x = (int)pos.X + 10;
+                int y = (int)pos.Y + 10;
+                if ((x + wndsize.Width) > screenWidth) x -= wndsize.Width;
+                if ((y + wndsize.Height) > screenHeight) y -= wndsize.Height;
+
+                SetWindowPos(hwnd, IntPtr.Zero, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 
                 System.Threading.Thread.Sleep(ms);
 
             }
         }
+
+
+
+
+
+
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
