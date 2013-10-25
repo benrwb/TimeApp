@@ -48,7 +48,7 @@ namespace TimeApp2
         {
             DateTime now = DateTime.Now;
 
-            int level = 2;
+            int level = 0;
             if (new[] { DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday }.Contains(now.DayOfWeek))
             {
                 if (now.TimeOfDay >= new TimeSpan(22, 45, 0)) 
