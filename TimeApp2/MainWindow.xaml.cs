@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +11,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -48,7 +48,7 @@ namespace TimeApp2
         {
             DateTime now = DateTime.Now;
 
-            int level = 0;
+            int level = 2;
             if (new[] { DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday }.Contains(now.DayOfWeek))
             {
                 if (now.TimeOfDay >= new TimeSpan(22, 45, 0)) 
@@ -94,22 +94,34 @@ namespace TimeApp2
             Dispatcher.Invoke((Action)delegate
             {
                 label1.Content = level == 2 && now.Minute % 2 == 0
-                    ? "☠:☠"
+                    ? "💬 zz"
                     : now.ToString("h:mm");
-                this.Show();
-            });
 
-            Brush color = (level == 2 ? Brushes.Red : Brushes.Orange);
-            Brush altcolor = (level == 2 ? Brushes.Black : Brushes.White);
-            for (int i = 0; i < 5; i++)
+                this.Show();
+
+                this.BeginAnimation(OpacityProperty, new DoubleAnimation { From = 0, To = 0.5, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
+
+                Color color = (level == 2 ? Colors.White : Colors.Black);
+                Color altcolor = (level == 2 ? Color.FromArgb(255, 223, 36, 40) : Colors.Orange);
+
+                label1.Foreground = new SolidColorBrush(color);
+                //label1.Foreground.BeginAnimation(SolidColorBrush.ColorProperty,
+                //    new ColorAnimation { From = Colors.White, To = Colors.Yellow, Duration = TimeSpan.FromSeconds(1.2) });
+
+                border1.Background = new SolidColorBrush(altcolor);
+                //border1.Background.BeginAnimation(SolidColorBrush.ColorProperty,
+                //     new ColorAnimation { From = altcolor, To = color, Duration = TimeSpan.FromSeconds(1.2) });
+            });
+            System.Threading.Thread.Sleep(800);
+
+
+            Dispatcher.Invoke((Action)delegate
             {
-                Dispatcher.Invoke((Action)delegate
-                {
-                    label1.Foreground = (i % 2 == 0) ? color : altcolor;
-                    border1.Background = (i % 2 != 0) ? color : altcolor;
-                });
-                System.Threading.Thread.Sleep(250);
-            }
+                this.BeginAnimation(OpacityProperty, 
+                    new DoubleAnimation { From = 0.5, To = 0, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
+
+            });
+            System.Threading.Thread.Sleep(800);
 
 
             Dispatcher.Invoke((Action)delegate
@@ -167,14 +179,14 @@ namespace TimeApp2
             GetWindowRect(hwnd, out wndsize);
 
 
-            for (int i = 0; i < 1200; i += ms) // follow the mouse cursor for 1.2 seconds, then exit
+            for (int i = 0; i < 1700; i += ms) // follow the mouse cursor for 1.7 seconds, then exit
             {
                 var pos = GetMousePosition();
 
-                int x = (int)pos.X + 10;
-                int y = (int)pos.Y + 10;
-                if ((x + wndsize.Width) > screenWidth) x -= wndsize.Width;
-                if ((y + wndsize.Height) > screenHeight) y -= wndsize.Height;
+                int x = (int)pos.X + 20;
+                int y = (int)pos.Y + 20;
+                //if ((x + wndsize.Width) > screenWidth) x -= wndsize.Width;
+                //if ((y + wndsize.Height) > screenHeight) y -= wndsize.Height;
 
                 SetWindowPos(hwnd, IntPtr.Zero, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 

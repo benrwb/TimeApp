@@ -1,11 +1,11 @@
 ﻿<Window x:Class="TimeApp2.MainWindow"
 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="TIMEAPP"  Height="46" Width="85" Topmost="True" ShowActivated="False" Visibility="Hidden"
+        Title="TIMEAPP"  Height="40" Width="95" Topmost="True" ShowActivated="False" Visibility="Hidden"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent">
     <Grid>
-        <Border x:Name="border1" CornerRadius="10,10,10,10" Background="Blue" Opacity="0.7">
-            <Label x:Name="label1" Content="Label" FontSize="24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Trebuchet MS" FontWeight="Bold"  />
+        <Border x:Name="border1" Background="Blue" CornerRadius="0,30,0,30" Opacity="0.7">
+            <Label x:Name="label1" Content="Label" FontSize="18" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="courier new"  />
         </Border>
 
 
