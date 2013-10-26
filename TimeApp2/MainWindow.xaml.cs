@@ -49,21 +49,21 @@ namespace TimeApp2
             DateTime now = DateTime.Now;
 
             int level = 0;
-            if (new[] { DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday }.Contains(now.DayOfWeek))
-            {
-                if (now.TimeOfDay >= new TimeSpan(22, 45, 0)) 
-                { 
-                    // fail
-                }
-                else if (now.TimeOfDay >= new TimeSpan(21, 45, 0))
-                {
-                    level = 2;
-                }
-                else if (now.TimeOfDay >= new TimeSpan(20, 30, 0))// && DateTime.Now.Minute % 5 == 0)
-                {
-                    level = 1;
-                }
+            //if (new[] { DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday }.Contains(now.DayOfWeek))
+            //{
+            if (now.TimeOfDay >= new TimeSpan(22, 45, 0)) 
+            { 
+                // fail
             }
+            else if (now.TimeOfDay >= new TimeSpan(21, 45, 0))
+            {
+                level = 2;
+            }
+            else if (now.TimeOfDay >= new TimeSpan(19, 0, 0))// && DateTime.Now.Minute % 5 == 0)
+            {
+                level = 1;
+            }
+            //}
             if (level == 0) return; // nothing to do
 
 
@@ -93,8 +93,9 @@ namespace TimeApp2
 
             Dispatcher.Invoke((Action)delegate
             {
-                label1.Content = level == 2 && now.Minute % 2 == 0
-                    ? "💬 zz"
+                label1.Content =
+                      level == 1 && now.Minute % 2 == 0 ? "❮ ❮ ❮"
+                    : level == 2 && now.Minute % 2 == 0 ? "💬 zz"
                     : now.ToString("h:mm");
 
                 this.Show();
