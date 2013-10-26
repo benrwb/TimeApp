@@ -95,7 +95,7 @@ namespace TimeApp2
             {
                 label1.Content =
                       level == 1 && now.Minute % 2 == 0 ? "❮ ❮ ❮"
-                    : level == 2 && now.Minute % 2 == 0 ? "💬 zz"
+                    : level == 2 && now.Minute % 2 == 0 ? "💭 zz" // 💬 💭
                     : now.ToString("h:mm");
 
                 this.Show();
