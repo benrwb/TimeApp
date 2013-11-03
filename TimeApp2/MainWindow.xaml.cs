@@ -55,7 +55,7 @@ namespace TimeApp2
             { 
                 // fail
             }
-            else if (now.TimeOfDay >= new TimeSpan(21, 45, 0))
+            else if (now.TimeOfDay >= new TimeSpan(21, 30, 0))
             {
                 level = 2;
             }
@@ -95,25 +95,21 @@ namespace TimeApp2
             {
                 label1.Content =
                       level == 1 && now.Minute % 2 == 0 ? "❮ ❮ ❮"
-                    : level == 2 && now.Minute % 2 == 0 ? "💭 zz" // 💬 💭
+                    : level == 2 && now.Minute % 2 == 0 ? "💭" // 💬 💭
                     : now.ToString("h:mm");
 
                 this.Show();
 
                 this.BeginAnimation(OpacityProperty, new DoubleAnimation { From = 0, To = 0.5, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
 
-                Color color = (level == 2 ? Colors.White : Colors.Black);
-                Color altcolor = (level == 2 ? Color.FromArgb(255, 223, 36, 40) : Colors.Orange);
+                Color color = Colors.White;// (level == 2 ? Colors.White : Colors.Black);
+                Color altcolor = (level == 2 ? Color.FromArgb(255, 223, 36, 40) : Colors.ForestGreen);
 
                 label1.Foreground = new SolidColorBrush(color);
-                //label1.Foreground.BeginAnimation(SolidColorBrush.ColorProperty,
-                //    new ColorAnimation { From = Colors.White, To = Colors.Yellow, Duration = TimeSpan.FromSeconds(1.2) });
 
                 border1.Background = new SolidColorBrush(altcolor);
-                //border1.Background.BeginAnimation(SolidColorBrush.ColorProperty,
-                //     new ColorAnimation { From = altcolor, To = color, Duration = TimeSpan.FromSeconds(1.2) });
             });
-            System.Threading.Thread.Sleep(800);
+            System.Threading.Thread.Sleep(level == 2 ? 1500 : 800);
 
 
             Dispatcher.Invoke((Action)delegate
@@ -180,12 +176,12 @@ namespace TimeApp2
             GetWindowRect(hwnd, out wndsize);
 
 
-            for (int i = 0; i < 1700; i += ms) // follow the mouse cursor for 1.7 seconds, then exit
+            for (int i = 0; i < 2000; i += ms) // follow the mouse cursor for 2 seconds, then exit
             {
                 var pos = GetMousePosition();
 
-                int x = (int)pos.X + 20;
-                int y = (int)pos.Y + 20;
+                int x = (int)pos.X + 15;
+                int y = (int)pos.Y + 15;
                 //if ((x + wndsize.Width) > screenWidth) x -= wndsize.Width;
                 //if ((y + wndsize.Height) > screenHeight) y -= wndsize.Height;
 
