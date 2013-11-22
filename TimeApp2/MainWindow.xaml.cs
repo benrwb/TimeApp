@@ -59,7 +59,7 @@ namespace TimeApp2
             {
                 level = 2;
             }
-            else if (now.TimeOfDay >= new TimeSpan(19, 0, 0))// && DateTime.Now.Minute % 5 == 0)
+            else if (now.TimeOfDay >= new TimeSpan(21, 0, 0))// && DateTime.Now.Minute % 5 == 0)
             {
                 level = 1;
             }
@@ -103,7 +103,7 @@ namespace TimeApp2
                 this.BeginAnimation(OpacityProperty, new DoubleAnimation { From = 0, To = 0.5, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
 
                 Color color = Colors.White;// (level == 2 ? Colors.White : Colors.Black);
-                Color altcolor = (level == 2 ? Color.FromArgb(255, 223, 36, 40) : Colors.ForestGreen);
+                Color altcolor = (level == 2 ? Colors.Orange : Colors.Yellow);
 
                 label1.Foreground = new SolidColorBrush(color);
 
