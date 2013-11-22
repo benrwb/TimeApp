@@ -48,7 +48,7 @@ namespace TimeApp2
         {
             DateTime now = DateTime.Now;
 
-            int level = 0;
+            int level = 1;
             //if (new[] { DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday }.Contains(now.DayOfWeek))
             //{
             if (now.TimeOfDay >= new TimeSpan(22, 45, 0)) 
@@ -94,28 +94,28 @@ namespace TimeApp2
             Dispatcher.Invoke((Action)delegate
             {
                 label1.Content =
-                      level == 1 && now.Minute % 2 == 0 ? "❮ ❮ ❮"
-                    : level == 2 && now.Minute % 2 == 0 ? "💭" // 💬 💭
+                      //level == 1 && now.Minute % 2 == 0 ? "❮ ❮ ❮"
+                    /*:*/ level == 2 && now.Minute % 2 == 0 ? "💭" // 💬 💭
                     : now.ToString("h:mm");
 
                 this.Show();
 
-                this.BeginAnimation(OpacityProperty, new DoubleAnimation { From = 0, To = 0.5, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
+                this.BeginAnimation(OpacityProperty, new DoubleAnimation { From = 0, To = 1, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
 
-                Color color = Colors.White;// (level == 2 ? Colors.White : Colors.Black);
-                Color altcolor = (level == 2 ? Colors.Orange : Colors.Yellow);
+                Color color = (level == 2 ? Colors.White : Colors.Black);
+                Color altcolor = (level == 2 ? Colors.DarkOrange : Colors.Gold);
 
                 label1.Foreground = new SolidColorBrush(color);
 
                 border1.Background = new SolidColorBrush(altcolor);
             });
-            System.Threading.Thread.Sleep(level == 2 ? 1500 : 800);
+            System.Threading.Thread.Sleep(/*level == 1 ? 800 :*/ 1500);
 
 
             Dispatcher.Invoke((Action)delegate
             {
                 this.BeginAnimation(OpacityProperty, 
-                    new DoubleAnimation { From = 0.5, To = 0, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
+                    new DoubleAnimation { From = 1, To = 0, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
 
             });
             System.Threading.Thread.Sleep(800);
