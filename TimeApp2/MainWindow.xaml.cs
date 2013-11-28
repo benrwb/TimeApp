@@ -64,6 +64,12 @@ namespace TimeApp2
                 level = 1;
             }
             //}
+
+
+
+            //level = 1;//========== FOR TESTING ==========
+
+
             if (level == 0) return; // nothing to do
 
 
@@ -81,116 +87,151 @@ namespace TimeApp2
             catch (System.Threading.WaitHandleCannotBeOpenedException)
             {
                 // not found
-                var asm = System.Reflection.Assembly.GetExecutingAssembly();
-                Desktops.StartProcessOnDesktop(asm.Location, currentDesktopName);
+                var thisasm = System.Reflection.Assembly.GetExecutingAssembly();
+                Desktops.StartProcessOnDesktop(thisasm.Location, currentDesktopName);
             }
             // END multiple desktops support
 
 
 
-            new System.Threading.Thread(pos).Start(); // follow the mouse cursor for 1.2 seconds
-            System.Threading.Thread.Sleep(100);// allow time for thread to start
+            ////////new System.Threading.Thread(pos).Start(); // follow the mouse cursor for 1.2 seconds
+            ////////System.Threading.Thread.Sleep(100);// allow time for thread to start
+
+          
+
 
             Dispatcher.Invoke((Action)delegate
             {
+
+                // SET CONTENT & COLOURS
+
                 label1.Content =
                       //level == 1 && now.Minute % 2 == 0 ? "❮ ❮ ❮"
                     /*:*/ level == 2 && now.Minute % 2 == 0 ? "💭" // 💬 💭
                     : now.ToString("h:mm");
 
-                this.Show();
-
-                this.BeginAnimation(OpacityProperty, new DoubleAnimation { From = 0, To = 1, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
-
                 Color color = (level == 2 ? Colors.White : Colors.Black);
-                Color altcolor = (level == 2 ? Colors.DarkOrange : Colors.Gold);
+                Color altcolor = (level == 2 ? Color.FromRgb(255, 106, 0) : Color.FromRgb(255, 216, 0));
 
                 label1.Foreground = new SolidColorBrush(color);
 
                 border1.Background = new SolidColorBrush(altcolor);
+
+
+
+                // "SHOW" WINDOW
+                this.Opacity = 0;
+                this.Show();
+
+
+
+                // FOLLOW MOUSE CURSOR
+                //      (HWND is not available until AFTER .Show() has been called)
+                var hwnd = new WindowInteropHelper(this).Handle;
+
+                var starting_pos = GetMousePosition();
+                SetWindowPos(hwnd, IntPtr.Zero, starting_pos.X + 15, starting_pos.Y + 15, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+
+                Action<Hook.MSLLHOOKSTRUCT> callback = p =>
+                {
+                    SetWindowPos(hwnd, IntPtr.Zero, p.pt.x + 15, p.pt.y + 15, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+                };
+                Hook.SetWindowsHook(callback);
+
+
+
+
+                // FADE IN
+                this.BeginAnimation(OpacityProperty, new DoubleAnimation { From = 0, To = 1, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
+              
             });
-            System.Threading.Thread.Sleep(/*level == 1 ? 800 :*/ 1500);
+            System.Threading.Thread.Sleep(level == 1 ? 800 : 1500);
 
 
+
+            // FADE OUT
             Dispatcher.Invoke((Action)delegate
             {
                 this.BeginAnimation(OpacityProperty, 
                     new DoubleAnimation { From = 1, To = 0, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
-
             });
             System.Threading.Thread.Sleep(800);
 
 
+            // CLOSE WINDOW
             Dispatcher.Invoke((Action)delegate
             {
                 this.Hide();
             });
+
+            Hook.UnhookWindowsHook();
         }
 
 
 
 
-        [DllImport("user32.dll")]
-        static extern int GetSystemMetrics(int smIndex);
-        const int SM_CXSCREEN = 0;  // 0x00
-        const int SM_CYSCREEN = 1;  // 0x01
+        //////////[DllImport("user32.dll")]
+        //////////static extern int GetSystemMetrics(int smIndex);
+        //////////const int SM_CXSCREEN = 0;  // 0x00
+        //////////const int SM_CYSCREEN = 1;  // 0x01
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            public int Left;        // x position of upper-left corner
-            public int Top;         // y position of upper-left corner
-            public int Right;       // x position of lower-right corner
-            public int Bottom;      // y position of lower-right corner
-            public int Width { get { return Right - Left; } } // some versions have Right - Left + 1
-            public int Height { get { return Bottom - Top; } } // some versions have Bottom - Top + 1
-        }
-        void pos()
-        {
-            IntPtr hwnd = IntPtr.Zero;
-            while (hwnd == IntPtr.Zero)
-            {
-                Dispatcher.Invoke((Action)delegate
-                {
-                    hwnd = new WindowInteropHelper(this).Handle;
-                });
-                if (hwnd == IntPtr.Zero) { System.Threading.Thread.Sleep(100); } // wait for window handle to become available
-            }
+        //////////[DllImport("user32.dll")]
+        //////////[return: MarshalAs(UnmanagedType.Bool)]
+        //////////public static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
+        //////////[StructLayout(LayoutKind.Sequential)]
+        //////////public struct RECT
+        //////////{
+        //////////    public int Left;        // x position of upper-left corner
+        //////////    public int Top;         // y position of upper-left corner
+        //////////    public int Right;       // x position of lower-right corner
+        //////////    public int Bottom;      // y position of lower-right corner
+        //////////    public int Width { get { return Right - Left; } } // some versions have Right - Left + 1
+        //////////    public int Height { get { return Bottom - Top; } } // some versions have Bottom - Top + 1
+        //////////}
+        //////////void pos()
+        //////////{
+        //////////    IntPtr hwnd = IntPtr.Zero;
+        //////////    while (hwnd == IntPtr.Zero)
+        //////////    {
+        //////////        Dispatcher.Invoke((Action)delegate
+        //////////        {
+        //////////            hwnd = new WindowInteropHelper(this).Handle;
+        //////////        });
+        //////////        if (hwnd == IntPtr.Zero) { System.Threading.Thread.Sleep(100); } // wait for window handle to become available
+        //////////    }
 
-            int ms = 15;  // 15ms ~ 60fps 
-            // ms to fps
-            // 1000 = 1
-            // 500  = 2
-            // 250  = 4
-            // 125  = 8
-            // 62.5 = 16
-            // 31.25 = 32
-            // 15.625 = 64
+        //////////    int ms = 15;  // 15ms ~ 60fps 
+        //////////    // ms to fps
+        //////////    // 1000 = 1
+        //////////    // 500  = 2
+        //////////    // 250  = 4
+        //////////    // 125  = 8
+        //////////    // 62.5 = 16
+        //////////    // 31.25 = 32
+        //////////    // 15.625 = 64
             
-            int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-            int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-            RECT wndsize;
-            GetWindowRect(hwnd, out wndsize);
+        //////////    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+        //////////    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+        //////////    RECT wndsize;
+        //////////    GetWindowRect(hwnd, out wndsize);
 
 
-            for (int i = 0; i < 2000; i += ms) // follow the mouse cursor for 2 seconds, then exit
-            {
-                var pos = GetMousePosition();
+        //////////    for (int i = 0; i < 2000; i += ms) // follow the mouse cursor for 2 seconds, then exit
+        //////////    {
+        //////////        var pos = GetMousePosition();
 
-                int x = (int)pos.X + 15;
-                int y = (int)pos.Y + 15;
-                //if ((x + wndsize.Width) > screenWidth) x -= wndsize.Width;
-                //if ((y + wndsize.Height) > screenHeight) y -= wndsize.Height;
+        //////////        int x = (int)pos.X + 15;
+        //////////        int y = (int)pos.Y + 15;
+        //////////        //if ((x + wndsize.Width) > screenWidth) x -= wndsize.Width;
+        //////////        //if ((y + wndsize.Height) > screenHeight) y -= wndsize.Height;
 
-                SetWindowPos(hwnd, IntPtr.Zero, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+        //////////        SetWindowPos(hwnd, IntPtr.Zero, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 
-                System.Threading.Thread.Sleep(ms);
+        //////////        System.Threading.Thread.Sleep(ms);
+        //////////    }
 
-            }
-        }
+
+        //////////}
 
 
 
@@ -203,16 +244,16 @@ namespace TimeApp2
         internal static extern bool GetCursorPos(ref Win32Point pt);
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct Win32Point
+        public struct Win32Point
         {
             public Int32 X;
             public Int32 Y;
         };
-        public static Point GetMousePosition()
+        public static Win32Point GetMousePosition()
         {
-            Win32Point w32Mouse = new Win32Point();
-            GetCursorPos(ref w32Mouse);
-            return new Point(w32Mouse.X, w32Mouse.Y);
+            var p = new Win32Point();
+            GetCursorPos(ref p);
+            return p;
         }
 
         [DllImport("user32.dll")]
