@@ -142,7 +142,7 @@ namespace TimeApp2
 
 
                 // FADE IN
-                this.BeginAnimation(OpacityProperty, new DoubleAnimation { From = 0, To = 0.8, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
+                this.BeginAnimation(OpacityProperty, new DoubleAnimation { From = 0, To = 0.67, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
               
             });
             System.Threading.Thread.Sleep(level == 1 ? 800 : 1500);
@@ -153,7 +153,7 @@ namespace TimeApp2
             Dispatcher.Invoke((Action)delegate
             {
                 this.BeginAnimation(OpacityProperty, 
-                    new DoubleAnimation { From = 0.8, To = 0, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
+                    new DoubleAnimation { From = 0.67, To = 0, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
             });
             System.Threading.Thread.Sleep(800);
 
