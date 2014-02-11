@@ -78,17 +78,20 @@ namespace TimeApp2
             // Check for synchronisation object for currently active desktop.
             // If it can't be found, start a new process.
             string currentDesktopName = Desktops.GetCurrentDesktopName();
-            try
+            if (currentDesktopName.StartsWith("Sysinternals Desktop")) // user is on another desktop (normal desktop is called "Default")
             {
-                var h = System.Threading.EventWaitHandle.OpenExisting(@"Global\TIMEAPP-" + currentDesktopName);
-                h.Close();
-                // found
-            }
-            catch (System.Threading.WaitHandleCannotBeOpenedException)
-            {
-                // not found
-                var thisasm = System.Reflection.Assembly.GetExecutingAssembly();
-                Desktops.StartProcessOnDesktop(thisasm.Location, currentDesktopName);
+                try
+                {
+                    var h = System.Threading.EventWaitHandle.OpenExisting(@"Global\TIMEAPP-" + currentDesktopName);
+                    h.Close();
+                    // found (no exception thrown)
+                }
+                catch (System.Threading.WaitHandleCannotBeOpenedException)
+                {
+                    // not found
+                    var thisasm = System.Reflection.Assembly.GetExecutingAssembly();
+                    Desktops.StartProcessOnDesktop(thisasm.Location, currentDesktopName);
+                }
             }
             // END multiple desktops support
 
