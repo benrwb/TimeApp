@@ -18,12 +18,12 @@ using System.Windows.Shapes;
 
 namespace TimeApp2
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         System.Threading.EventWaitHandle ewh; // support for running on multiple desktops
+
+
+        // TODO: Hook.UnhookWindowsHook();    on Application.Exit
 
 
         public MainWindow()
@@ -35,50 +35,47 @@ namespace TimeApp2
 
 
 
-            Timer t = new Timer() { Interval = 60000 };
-            t.Elapsed += t_Elapsed;
+            Timer t = new Timer() { Interval = 1000 };
+            t.Elapsed += CheckTime;
             t.Start();
 
             Timer t2 = new Timer() { Interval = 1000, AutoReset = false };
-            t2.Elapsed += t_Elapsed;
+            t2.Elapsed += CheckTime;
             t2.Start();
+
+            var t3 = new Timer() { Interval = 100, AutoReset = false };
+            t3.Elapsed += BeginFollowMouse;
+            t3.Start();
         }
 
-        void t_Elapsed(object sender, ElapsedEventArgs e)
+        void BeginFollowMouse(object sender, ElapsedEventArgs e)
         {
-            DateTime now = DateTime.Now;
+            Dispatcher.Invoke((Action)delegate
+           {
 
-            int level = 0;
-            //if (new[] { DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday }.Contains(now.DayOfWeek))
-            //{
-            if (now.TimeOfDay >= new TimeSpan(22, 45, 0)) 
-            { 
-                // fail
-            }
-            else if (now.TimeOfDay >= new TimeSpan(21, 30, 0))
-            {
-                level = 2;
-            }
-            else if (now.TimeOfDay >= new TimeSpan(21, 0, 0))// && DateTime.Now.Minute % 5 == 0)
-            {
-                level = 1;
-            }
-            //}
+               // FOLLOW MOUSE CURSOR
+               //      (HWND is not available until AFTER .Show() has been called)
+               var hwnd = new WindowInteropHelper(this).Handle;
 
+               //var starting_pos = GetMousePosition();
+               //SetWindowPos(hwnd, IntPtr.Zero, starting_pos.X + 15, starting_pos.Y + 15, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 
+               Action<Hook.MSLLHOOKSTRUCT> callback = p =>
+               {
+                   SetWindowPos(hwnd, IntPtr.Zero, p.pt.x + 15, p.pt.y + 15, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+               };
+               Hook.SetWindowsHook(callback);
+           });
 
-            //level = 1;//========== FOR TESTING ==========
+        }
 
-
-            if (level == 0) return; // nothing to do
-
-
-
+        void CheckTime(object sender, ElapsedEventArgs e)
+        {
             // BEGIN multiple desktops support
             // Check for synchronisation object for currently active desktop.
             // If it can't be found, start a new process.
             string currentDesktopName = Desktops.GetCurrentDesktopName();
-            if (currentDesktopName.StartsWith("Sysinternals Desktop")) // user is on another desktop (normal desktop is called "Default")
+            if (currentDesktopName.StartsWith("Sysinternals Desktop")) // user is on another desktop (will already be running on "Default" desktop)
             {
                 try
                 {
@@ -97,144 +94,28 @@ namespace TimeApp2
 
 
 
-            ////////new System.Threading.Thread(pos).Start(); // follow the mouse cursor for 1.2 seconds
-            ////////System.Threading.Thread.Sleep(100);// allow time for thread to start
 
-          
 
+            DateTime now = DateTime.Now;
+
+            var target_time = new TimeSpan(22, 00, 00);
+            TimeSpan diff = now.TimeOfDay - target_time;
+            var prefix = diff.Ticks < 0 ? "-" : "+";
 
             Dispatcher.Invoke((Action)delegate
             {
+                label1.Content = prefix + diff.ToString("hh\\:mm");
+                label1.Foreground = new SolidColorBrush(diff.Ticks < 0 ? Colors.Black : Colors.Red);
 
-                // SET CONTENT & COLOURS
-
-                label1.Content =
-                      //level == 1 && now.Minute % 2 == 0 ? "❮ ❮ ❮"
-                    /*:*/ level == 2 && now.Minute % 2 == 0 ? "💭" // 💬 💭
-                    : now.ToString("h:mm");
-
-                Color color = (level == 2 ? Colors.White : Colors.Black);
-                Color altcolor = (level == 2 ? Color.FromRgb(255, 106, 0) : Color.FromRgb(255, 216, 0));
-
-                label1.Foreground = new SolidColorBrush(color);
-
-                border1.Background = new SolidColorBrush(altcolor);
-
-
-
-                // "SHOW" WINDOW
-                this.Opacity = 0;
-                this.Show();
-
-
-
-                // FOLLOW MOUSE CURSOR
-                //      (HWND is not available until AFTER .Show() has been called)
-                var hwnd = new WindowInteropHelper(this).Handle;
-
-                var starting_pos = GetMousePosition();
-                SetWindowPos(hwnd, IntPtr.Zero, starting_pos.X + 15, starting_pos.Y + 15, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-
-                Action<Hook.MSLLHOOKSTRUCT> callback = p =>
-                {
-                    SetWindowPos(hwnd, IntPtr.Zero, p.pt.x + 15, p.pt.y + 15, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-                };
-                Hook.SetWindowsHook(callback);
-
-
-
-
-                // FADE IN
-                this.BeginAnimation(OpacityProperty, new DoubleAnimation { From = 0, To = 0.67, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
-              
+                // Hide the label not the window (i.e. with this.Hide()) 
+                // because then SetWindowPos would be trying to position a window which "doesn't exist"
+                // which for some reason disables left-click system-wide(!)
+                label1.Visibility = (diff.TotalMinutes > -60)
+                    ? System.Windows.Visibility.Visible
+                    : System.Windows.Visibility.Hidden;
             });
-            System.Threading.Thread.Sleep(level == 1 ? 800 : 1500);
-
-
-
-            // FADE OUT
-            Dispatcher.Invoke((Action)delegate
-            {
-                this.BeginAnimation(OpacityProperty, 
-                    new DoubleAnimation { From = 0.67, To = 0, Duration = TimeSpan.FromSeconds(0.8), EasingFunction = new SineEase() });
-            });
-            System.Threading.Thread.Sleep(800);
-
-
-            // CLOSE WINDOW
-            Dispatcher.Invoke((Action)delegate
-            {
-                this.Hide();
-            });
-
-            Hook.UnhookWindowsHook();
         }
-
-
-
-
-        //////////[DllImport("user32.dll")]
-        //////////static extern int GetSystemMetrics(int smIndex);
-        //////////const int SM_CXSCREEN = 0;  // 0x00
-        //////////const int SM_CYSCREEN = 1;  // 0x01
-
-        //////////[DllImport("user32.dll")]
-        //////////[return: MarshalAs(UnmanagedType.Bool)]
-        //////////public static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
-        //////////[StructLayout(LayoutKind.Sequential)]
-        //////////public struct RECT
-        //////////{
-        //////////    public int Left;        // x position of upper-left corner
-        //////////    public int Top;         // y position of upper-left corner
-        //////////    public int Right;       // x position of lower-right corner
-        //////////    public int Bottom;      // y position of lower-right corner
-        //////////    public int Width { get { return Right - Left; } } // some versions have Right - Left + 1
-        //////////    public int Height { get { return Bottom - Top; } } // some versions have Bottom - Top + 1
-        //////////}
-        //////////void pos()
-        //////////{
-        //////////    IntPtr hwnd = IntPtr.Zero;
-        //////////    while (hwnd == IntPtr.Zero)
-        //////////    {
-        //////////        Dispatcher.Invoke((Action)delegate
-        //////////        {
-        //////////            hwnd = new WindowInteropHelper(this).Handle;
-        //////////        });
-        //////////        if (hwnd == IntPtr.Zero) { System.Threading.Thread.Sleep(100); } // wait for window handle to become available
-        //////////    }
-
-        //////////    int ms = 15;  // 15ms ~ 60fps 
-        //////////    // ms to fps
-        //////////    // 1000 = 1
-        //////////    // 500  = 2
-        //////////    // 250  = 4
-        //////////    // 125  = 8
-        //////////    // 62.5 = 16
-        //////////    // 31.25 = 32
-        //////////    // 15.625 = 64
-            
-        //////////    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-        //////////    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-        //////////    RECT wndsize;
-        //////////    GetWindowRect(hwnd, out wndsize);
-
-
-        //////////    for (int i = 0; i < 2000; i += ms) // follow the mouse cursor for 2 seconds, then exit
-        //////////    {
-        //////////        var pos = GetMousePosition();
-
-        //////////        int x = (int)pos.X + 15;
-        //////////        int y = (int)pos.Y + 15;
-        //////////        //if ((x + wndsize.Width) > screenWidth) x -= wndsize.Width;
-        //////////        //if ((y + wndsize.Height) > screenHeight) y -= wndsize.Height;
-
-        //////////        SetWindowPos(hwnd, IntPtr.Zero, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-
-        //////////        System.Threading.Thread.Sleep(ms);
-        //////////    }
-
-
-        //////////}
+        
 
 
 
@@ -242,22 +123,30 @@ namespace TimeApp2
 
 
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool GetCursorPos(ref Win32Point pt);
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct Win32Point
-        {
-            public Int32 X;
-            public Int32 Y;
-        };
-        public static Win32Point GetMousePosition()
-        {
-            var p = new Win32Point();
-            GetCursorPos(ref p);
-            return p;
-        }
+        
+
+
+
+
+
+
+        //[DllImport("user32.dll")]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //internal static extern bool GetCursorPos(ref Win32Point pt);
+
+        //[StructLayout(LayoutKind.Sequential)]
+        //public struct Win32Point
+        //{
+        //    public Int32 X;
+        //    public Int32 Y;
+        //};
+        //public static Win32Point GetMousePosition()
+        //{
+        //    var p = new Win32Point();
+        //    GetCursorPos(ref p);
+        //    return p;
+        //}
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
