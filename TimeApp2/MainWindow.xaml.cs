@@ -62,7 +62,7 @@ namespace TimeApp2
 
                Action<Hook.MSLLHOOKSTRUCT> callback = p =>
                {
-                   SetWindowPos(hwnd, IntPtr.Zero, p.pt.x + 15, p.pt.y + 15, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+                   SetWindowPos(hwnd, HWND_TOPMOST, p.pt.x + 15, p.pt.y + 15, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE /*| SWP_NOZORDER*/);
                };
                Hook.SetWindowsHook(callback);
            });
@@ -111,8 +111,8 @@ namespace TimeApp2
                 // because then SetWindowPos would be trying to position a window which "doesn't exist"
                 // which for some reason disables left-click system-wide(!)
                 label1.Visibility = (diff.TotalMinutes > -60)
-                    ? System.Windows.Visibility.Visible
-                    : System.Windows.Visibility.Hidden;
+                    ? Visibility.Visible
+                    : Visibility.Hidden;
             });
         }
         
@@ -153,7 +153,8 @@ namespace TimeApp2
         static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
         const int SWP_NOZORDER = 0x0004;
         const int SWP_NOSIZE = 0x0001;
-
+        const int SWP_NOACTIVATE = 0x0010;
+        IntPtr HWND_TOPMOST = new IntPtr(-1);
 
 
     }
