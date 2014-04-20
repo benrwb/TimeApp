@@ -39,10 +39,6 @@ namespace TimeApp2
             t.Elapsed += CheckTime;
             t.Start();
 
-            Timer t2 = new Timer() { Interval = 1000, AutoReset = false };
-            t2.Elapsed += CheckTime;
-            t2.Start();
-
             var t3 = new Timer() { Interval = 100, AutoReset = false };
             t3.Elapsed += BeginFollowMouse;
             t3.Start();
@@ -102,9 +98,11 @@ namespace TimeApp2
             TimeSpan diff = now.TimeOfDay - target_time;
             var prefix = diff.Ticks < 0 ? "-" : "+";
 
+            string labelText = prefix + diff.ToString("hh\\:mm");
+            
             Dispatcher.Invoke((Action)delegate
             {
-                label1.Content = prefix + diff.ToString("hh\\:mm");
+                label1.Content = labelText;
                 label1.Foreground = new SolidColorBrush(diff.Ticks < 0 ? Colors.Black : Colors.Red);
 
                 // Hide the label not the window (i.e. with this.Hide()) 
@@ -114,40 +112,44 @@ namespace TimeApp2
                     ? Visibility.Visible
                     : Visibility.Hidden;
             });
+
+            if (prevLabelText != null && !labelText.Equals(prevLabelText))
+            {
+                new System.Threading.Thread(Blink).Start();// blink every minute to attract attention
+            }
+            prevLabelText = labelText;
+
         }
+
+        string prevLabelText = null;
+
+
+        void Blink()
+        {
+            for(int i = 0; i < 2; i++)
+            {
+                Dispatcher.Invoke((Action)delegate
+                {
+                    label1.Background = new SolidColorBrush(Colors.White);
+                });
+                System.Threading.Thread.Sleep(250);
+
+                Dispatcher.Invoke((Action)delegate
+                {
+                    label1.Background = null;
+                });
+                System.Threading.Thread.Sleep(250);
+            }
+        }
+
+
+
+
+
+
         
 
-
-
-
-
-
-
-
         
-
-
-
-
-
-
-        //[DllImport("user32.dll")]
-        //[return: MarshalAs(UnmanagedType.Bool)]
-        //internal static extern bool GetCursorPos(ref Win32Point pt);
-
-        //[StructLayout(LayoutKind.Sequential)]
-        //public struct Win32Point
-        //{
-        //    public Int32 X;
-        //    public Int32 Y;
-        //};
-        //public static Win32Point GetMousePosition()
-        //{
-        //    var p = new Win32Point();
-        //    GetCursorPos(ref p);
-        //    return p;
-        //}
-
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
