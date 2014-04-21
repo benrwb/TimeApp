@@ -1,7 +1,7 @@
 ﻿<Window x:Class="TimeApp2.MainWindow"
 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="TIMEAPP"  Height="20" Width="40" 
+        Title="TIMEAPP"  Height="20" Width="45" 
         WindowStyle="None" AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False">
     <Grid>
         <!--<Border x:Name="border1" Background="Blue" >-->

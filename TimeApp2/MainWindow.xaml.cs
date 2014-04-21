@@ -113,9 +113,9 @@ namespace TimeApp2
                     : Visibility.Hidden;
             });
 
-            if (prevLabelText != null && !labelText.Equals(prevLabelText))
+            if (prevLabelText != null && !labelText.Equals(prevLabelText) && prefix == "+")
             {
-                new System.Threading.Thread(Blink).Start();// blink every minute to attract attention
+                Blink(); // blink every minute to attract attention
             }
             prevLabelText = labelText;
 
@@ -126,20 +126,17 @@ namespace TimeApp2
 
         void Blink()
         {
-            for(int i = 0; i < 2; i++)
+            new System.Threading.Thread(() =>
             {
-                Dispatcher.Invoke((Action)delegate
+                foreach (var color in new[] { Colors.White, Colors.Black, Colors.White, Colors.Black, Colors.Transparent })
                 {
-                    label1.Background = new SolidColorBrush(Colors.White);
-                });
-                System.Threading.Thread.Sleep(250);
-
-                Dispatcher.Invoke((Action)delegate
-                {
-                    label1.Background = null;
-                });
-                System.Threading.Thread.Sleep(250);
-            }
+                    Dispatcher.Invoke((Action)delegate
+                    {
+                        label1.Background = new SolidColorBrush(color);
+                    });
+                    System.Threading.Thread.Sleep(250);
+                }
+            }).Start();
         }
 
 
