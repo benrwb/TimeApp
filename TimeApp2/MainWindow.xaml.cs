@@ -128,11 +128,19 @@ namespace TimeApp2
         {
             new System.Threading.Thread(() =>
             {
-                foreach (var color in new[] { Colors.White, Colors.Black, Colors.White, Colors.Black, Colors.Transparent })
+                //foreach (var color in new[] { Colors.White, Colors.Black, Colors.White, Colors.Black, Colors.Transparent })
+                //{
+                //    Dispatcher.Invoke((Action)delegate
+                //    {
+                //        label1.Background = new SolidColorBrush(color);
+                //    });
+                //    System.Threading.Thread.Sleep(250);
+                //}
+                foreach (var color in new[] { Colors.Black, Colors.Red, Colors.Black, Colors.Red })
                 {
                     Dispatcher.Invoke((Action)delegate
                     {
-                        label1.Background = new SolidColorBrush(color);
+                        label1.Foreground = new SolidColorBrush(color);
                     });
                     System.Threading.Thread.Sleep(250);
                 }
