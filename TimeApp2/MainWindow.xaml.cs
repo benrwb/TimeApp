@@ -35,7 +35,7 @@ namespace TimeApp2
 
 
 
-            Timer t = new Timer() { Interval = 1000 };
+            Timer t = new Timer() { Interval = 5000 };
             t.Elapsed += CheckTime;
             t.Start();
 
@@ -115,7 +115,7 @@ namespace TimeApp2
 
             if (prevLabelText != null && !labelText.Equals(prevLabelText) && prefix == "+")
             {
-                Blink(); // blink every minute to attract attention
+                Animate(); // animate every minute to attract attention
             }
             prevLabelText = labelText;
 
@@ -124,7 +124,7 @@ namespace TimeApp2
         string prevLabelText = null;
 
 
-        void Blink()
+        void Animate()
         {
             new System.Threading.Thread(() =>
             {
@@ -136,14 +136,29 @@ namespace TimeApp2
                 //    });
                 //    System.Threading.Thread.Sleep(250);
                 //}
-                foreach (var color in new[] { Colors.Black, Colors.Red, Colors.Black, Colors.Red })
+                //foreach (var color in new[] { Colors.Black, Colors.Red, Colors.Black, Colors.Red })
+                //{
+                //    Dispatcher.Invoke((Action)delegate
+                //    {
+                //        label1.Foreground = new SolidColorBrush(color);
+                //    });
+                //    System.Threading.Thread.Sleep(250);
+                //}
+                for (int i = prevLabelText.Length; i >= 0; i--)
                 {
-                    Dispatcher.Invoke((Action)delegate
-                    {
-                        label1.Foreground = new SolidColorBrush(color);
-                    });
+                    var animtext = prevLabelText.Substring(0, i);
+                    animtext = animtext.PadRight(prevLabelText.Length, 'Z');
+                    Dispatcher.Invoke((Action)delegate { label1.Content = animtext; });
                     System.Threading.Thread.Sleep(250);
                 }
+                for (int i = prevLabelText.Length - 1; i >= 0; i--)
+                {
+                    var animtext = prevLabelText.Substring(i);
+                    animtext = animtext.PadLeft(prevLabelText.Length, 'Z');
+                    Dispatcher.Invoke((Action)delegate { label1.Content = animtext; });
+                    System.Threading.Thread.Sleep(250);
+                }
+
             }).Start();
         }
 

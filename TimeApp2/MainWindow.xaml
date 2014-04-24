@@ -6,7 +6,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     <Grid>
         <!--<Border x:Name="border1" Background="Blue" >-->
             <Label x:Name="label1" Content="00:00" HorizontalContentAlignment="Left" VerticalContentAlignment="Top" 
-                   FontFamily="Verdana" FontSize="8"  />
+                   FontFamily="Consolas" FontSize="9"  />
         <!--</Border>-->
     </Grid>
 </Window>
